@@ -16,7 +16,7 @@ end
 local function setup_scratch_buffer(buf)
   local config = get_config()
 
-  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].buftype = "acwrite"
   vim.bo[buf].filetype = config.filetype
   vim.bo[buf].swapfile = false
   vim.bo[buf].bufhidden = config.scratch_bufhidden
