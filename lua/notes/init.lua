@@ -4,7 +4,8 @@ local M = {}
 
 local config = {
   dir = "~/.notes",
-  filetype = "md",
+  filetype = "markdown",
+  scratch_bufhidden = "hide",  -- "hide" | "wipe"
 }
 
 function M.setup(opts)
@@ -18,6 +19,10 @@ function M.get_config()
 end
 
 function M.new()
+  window.new_scratch()
+end
+
+function M.scratch()
   window.open_scratch()
 end
 

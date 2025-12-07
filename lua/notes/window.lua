@@ -16,15 +16,16 @@ end
 local function setup_scratch_buffer(buf)
   local config = get_config()
 
-  vim.bo[buf].buftype = "acwrite"
+  vim.bo[buf].buftype = "nofile"
   vim.bo[buf].filetype = config.filetype
   vim.bo[buf].swapfile = false
+  vim.bo[buf].bufhidden = config.scratch_bufhidden
 
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = buf,
     callback = function()
       local timestamp = os.date("%Y-%m-%d_%H-%M-%S")
-      vim.ui.input({ prompt = "Name (optional, prefix: " .. timestamp .. "): " }, function(input)
+      vim.ui.input({ prompt = timestamp .. "-: " }, function(input)
         if input == nil then
           return -- cancelled
         end
@@ -51,7 +52,32 @@ local function setup_scratch_buffer(buf)
   })
 end
 
+local function find_scratch_buffer()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    local name = vim.api.nvim_buf_get_name(buf)
+    if name:match("%[scratch%-%d+%]$") and vim.api.nvim_buf_is_loaded(buf) then
+      return buf
+    end
+  end
+  return nil
+end
+
 function M.open_scratch()
+  local existing = find_scratch_buffer()
+  if existing then
+    open_split(existing)
+    return
+  end
+
+  scratch_count = scratch_count + 1
+  local buf = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_buf_set_name(buf, "[scratch-" .. scratch_count .. "]")
+
+  setup_scratch_buffer(buf)
+  open_split(buf)
+end
+
+function M.new_scratch()
   scratch_count = scratch_count + 1
   local buf = vim.api.nvim_create_buf(true, false)
   vim.api.nvim_buf_set_name(buf, "[scratch-" .. scratch_count .. "]")
