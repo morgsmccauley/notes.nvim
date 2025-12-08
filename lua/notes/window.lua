@@ -19,13 +19,14 @@ local function setup_scratch_buffer(buf)
   vim.bo[buf].buftype = "acwrite"
   vim.bo[buf].filetype = config.filetype
   vim.bo[buf].swapfile = false
-  vim.bo[buf].bufhidden = config.scratch_bufhidden
+  vim.bo[buf].bufhidden = config.bufhidden
 
-  vim.api.nvim_create_autocmd("BufWriteCmd", {
+  local autocmd_id
+  autocmd_id = vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = buf,
     callback = function()
       local timestamp = os.date("%Y-%m-%d_%H-%M-%S")
-      vim.ui.input({ prompt = timestamp .. "-: " }, function(input)
+      vim.ui.input({ prompt = timestamp .. "_: " }, function(input)
         if input == nil then
           return -- cancelled
         end
@@ -40,6 +41,9 @@ local function setup_scratch_buffer(buf)
         local filepath = config.dir .. "/" .. filename
         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
         vim.fn.writefile(lines, filepath)
+
+        -- Remove this autocmd before converting to normal buffer
+        vim.api.nvim_del_autocmd(autocmd_id)
 
         -- Convert to normal file buffer
         vim.bo[buf].buftype = ""

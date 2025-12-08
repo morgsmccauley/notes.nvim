@@ -5,7 +5,7 @@ local M = {}
 local config = {
   dir = "~/.notes",
   filetype = "markdown",
-  scratch_bufhidden = "hide",  -- "hide" | "wipe"
+  bufhidden = "hide", -- "hide" | "wipe"
 }
 
 function M.setup(opts)
